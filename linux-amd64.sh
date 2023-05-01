@@ -16,7 +16,7 @@ agentDL='https://agents.tacticalrmm.com/api/v2/agents/?version=2.4.6&arch=amd64&
 meshDL='https://mesh.tactical-rts.com/meshagents?id=bq3U5aIE4ZEMXuv@ybXgQrOtV9CUOI6ilbNpV8IQUNvVIfnYTk6FKlppYB7Q7@xt&installflags=2&meshinstall=6'
 
 apiURL='https://api.tactical-rts.com'
-token='509ca4990f42d738fd4fdf3900e104c5099174def535642d7c311e9f7a6d9cea'
+token='b5674f6865b0f69e777bc9ba4a3c07768c0757677075ca93a16daa7046d720da'
 clientID='6'
 siteID='7'
 agentType='workstation'
