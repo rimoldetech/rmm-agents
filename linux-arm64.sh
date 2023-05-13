@@ -12,14 +12,14 @@ if [ "${HAS_SYSTEMD}" != 'systemd' ]; then
     exit 1
 fi
 
-agentDL='https://agents.tacticalrmm.com/api/v2/agents/?version=2.4.6&arch=arm64&token=aa028d46-6b91-4a1c-8686-35e947528067&plat=linux&api=api.tactical-rts.com'
+agentDL='https://agents.tacticalrmm.com/api/v2/agents/?version=2.4.8&arch=arm64&token=aa028d46-6b91-4a1c-8686-35e947528067&plat=linux&api=api.tactical-rts.com'
 meshDL='https://mesh.tactical-rts.com/meshagents?id=bq3U5aIE4ZEMXuv@ybXgQrOtV9CUOI6ilbNpV8IQUNvVIfnYTk6FKlppYB7Q7@xt&installflags=2&meshinstall=26'
 
 apiURL='https://api.tactical-rts.com'
-token='6fbfa5d405f644215b2161cbb472d005799d8969b4581a117edd09c08505e5ac'
+token='37fcec5c7123ed642e0790faab1a30af74f99acb251f6f8dc5d62586dcc44a27'
 clientID='6'
 siteID='7'
-agentType='workstation'
+agentType='server'
 proxy=''
 
 agentBinPath='/usr/local/bin'
