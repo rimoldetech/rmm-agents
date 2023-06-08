@@ -12,11 +12,11 @@ if [ "${HAS_SYSTEMD}" != 'systemd' ]; then
     exit 1
 fi
 
-agentDL='https://agents.tacticalrmm.com/api/v2/agents/?version=2.4.8&arch=amd64&token=aa028d46-6b91-4a1c-8686-35e947528067&plat=linux&api=api.tactical-rts.com'
+agentDL='https://agents.tacticalrmm.com/api/v2/agents/?version=2.4.9&arch=amd64&token=aa028d46-6b91-4a1c-8686-35e947528067&plat=linux&api=api.tactical-rts.com'
 meshDL='https://mesh.tactical-rts.com/meshagents?id=bq3U5aIE4ZEMXuv@ybXgQrOtV9CUOI6ilbNpV8IQUNvVIfnYTk6FKlppYB7Q7@xt&installflags=2&meshinstall=6'
 
 apiURL='https://api.tactical-rts.com'
-token='0ef02275f3fc85d38e2e7dba426cdc006ec66f7bdd70e7234fcdefc8d4871a79'
+token='9487323902434a4a39bbf7281bb05e6caee08e74919e1b4bea9868fbdf63205d'
 clientID='6'
 siteID='7'
 agentType='server'
