@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 if [ $EUID -ne 0 ]; then
-  echo "ERROR: Must be run as root"
-  exit 1
+    echo "ERROR: Must be run as root"
+    exit 1
 fi
 
 HAS_SYSTEMD=$(ps --no-headers -o comm 1)
@@ -12,11 +12,24 @@ if [ "${HAS_SYSTEMD}" != 'systemd' ]; then
     exit 1
 fi
 
-agentDL='https://agents.tacticalrmm.com/api/v2/agents/?version=2.4.9&arch=amd64&token=aa028d46-6b91-4a1c-8686-35e947528067&plat=linux&api=api.tactical-rts.com'
+if [[ $DISPLAY ]]; then
+    echo "ERROR: Display detected. Installer only supports running headless, i.e from ssh."
+    echo "If you cannot ssh in then please run 'sudo systemctl isolate multi-user.target' to switch to a non-graphical user session and run the installer again."
+    echo "If you are already running headless, then you are probably running with X forwarding which is setting DISPLAY, if so then simply run"
+    echo "unset DISPLAY"
+    echo "to unset the variable and then try running the installer again"
+    exit 1
+fi
+
+DEBUG=0
+INSECURE=0
+NOMESH=0
+
+agentDL='https://agents.tacticalrmm.com/api/v2/agents/?version=2.7.0&arch=amd64&token=aa028d46-6b91-4a1c-8686-35e947528067&plat=linux&api=api.tactical-rts.com'
 meshDL='https://mesh.tactical-rts.com/meshagents?id=bq3U5aIE4ZEMXuv@ybXgQrOtV9CUOI6ilbNpV8IQUNvVIfnYTk6FKlppYB7Q7@xt&installflags=2&meshinstall=6'
 
 apiURL='https://api.tactical-rts.com'
-token='b35e67b827589c430945ef3f82777e6ac887052aa1d5f4615e2bbb13576396ce'
+token='e34f9b8bf03883793a3429f3b5d2f9076783483f59ebff70cf13e41300ed615b'
 clientID='6'
 siteID='7'
 agentType='server'
@@ -28,6 +41,7 @@ agentBin="${agentBinPath}/${binName}"
 agentConf='/etc/tacticalagent'
 agentSvcName='tacticalagent.service'
 agentSysD="/etc/systemd/system/${agentSvcName}"
+agentDir='/opt/tacticalagent'
 meshDir='/opt/tacticalmesh'
 meshSystemBin="${meshDir}/meshagent"
 meshSvcName='meshagent.service'
@@ -37,38 +51,48 @@ deb=(ubuntu debian raspbian kali linuxmint)
 rhe=(fedora rocky centos rhel amzn arch opensuse)
 
 set_locale_deb() {
-locale-gen "en_US.UTF-8"
-localectl set-locale LANG=en_US.UTF-8
-. /etc/default/locale
+    locale-gen "en_US.UTF-8"
+    localectl set-locale LANG=en_US.UTF-8
+    . /etc/default/locale
 }
 
 set_locale_rhel() {
-localedef -c -i en_US -f UTF-8 en_US.UTF-8 > /dev/null 2>&1
-localectl set-locale LANG=en_US.UTF-8
-. /etc/locale.conf
+    localedef -c -i en_US -f UTF-8 en_US.UTF-8 >/dev/null 2>&1
+    localectl set-locale LANG=en_US.UTF-8
+    . /etc/locale.conf
 }
 
 RemoveOldAgent() {
     if [ -f "${agentSysD}" ]; then
         systemctl disable ${agentSvcName}
         systemctl stop ${agentSvcName}
-        rm -f ${agentSysD}
+        rm -f "${agentSysD}"
         systemctl daemon-reload
     fi
 
     if [ -f "${agentConf}" ]; then
-        rm -f ${agentConf}
+        rm -f "${agentConf}"
     fi
 
     if [ -f "${agentBin}" ]; then
-        rm -f ${agentBin}
+        rm -f "${agentBin}"
+    fi
+
+    if [ -d "${agentDir}" ]; then
+        rm -rf "${agentDir}"
     fi
 }
 
 InstallMesh() {
     if [ -f /etc/os-release ]; then
-        distroID=$(. /etc/os-release; echo $ID)
-        distroIDLIKE=$(. /etc/os-release; echo $ID_LIKE)
+        distroID=$(
+            . /etc/os-release
+            echo $ID
+        )
+        distroIDLIKE=$(
+            . /etc/os-release
+            echo $ID_LIKE
+        )
         if [[ " ${deb[*]} " =~ " ${distroID} " ]]; then
             set_locale_deb
         elif [[ " ${deb[*]} " =~ " ${distroIDLIKE} " ]]; then
@@ -80,11 +104,9 @@ InstallMesh() {
         fi
     fi
 
-    meshTmpDir=$(mktemp -d -t "mesh-XXXXXXXXX")
-    if [ $? -ne 0 ]; then
-        meshTmpDir='/root/meshtemp'
-        mkdir -p ${meshTmpDir}
-    fi
+    meshTmpDir='/root/meshtemp'
+    mkdir -p $meshTmpDir
+
     meshTmpBin="${meshTmpDir}/meshagent"
     wget --no-check-certificate -q -O ${meshTmpBin} ${meshDL}
     chmod +x ${meshTmpBin}
@@ -101,8 +123,8 @@ RemoveMesh() {
     fi
 
     if [ -f "${meshSysD}" ]; then
-        systemctl stop ${meshSvcName} > /dev/null 2>&1
-        systemctl disable ${meshSvcName} > /dev/null 2>&1
+        systemctl stop ${meshSvcName} >/dev/null 2>&1
+        systemctl disable ${meshSvcName} >/dev/null 2>&1
         rm -f ${meshSysD}
     fi
 
@@ -115,10 +137,25 @@ Uninstall() {
     RemoveOldAgent
 }
 
-if [ $# -ne 0 ] && [ $1 == 'uninstall' ]; then
+if [ $# -ne 0 ] && [[ $1 =~ ^(uninstall|-uninstall|--uninstall)$ ]]; then
     Uninstall
+    # Remove the current script
+    rm "$0"
     exit 0
 fi
+
+while [[ "$#" -gt 0 ]]; do
+    case $1 in
+    -debug | --debug | debug) DEBUG=1 ;;
+    -insecure | --insecure | insecure) INSECURE=1 ;;
+    -nomesh | --nomesh | nomesh) NOMESH=1 ;;
+    *)
+        echo "ERROR: Unknown parameter: $1"
+        exit 1
+        ;;
+    esac
+    shift
+done
 
 RemoveOldAgent
 
@@ -132,7 +169,7 @@ chmod +x ${agentBin}
 
 MESH_NODE_ID=""
 
-if [ $# -ne 0 ] && [ $1 == '--nomesh' ]; then
+if [[ $NOMESH -eq 1 ]]; then
     echo "Skipping mesh install"
 else
     if [ -f "${meshSystemBin}" ]; then
@@ -150,23 +187,28 @@ if [ ! -d "${agentBinPath}" ]; then
     mkdir -p ${agentBinPath}
 fi
 
-if [ $# -ne 0 ] && [ $1 == '--debug' ]; then
-    INSTALL_CMD="${agentBin} -m install -api ${apiURL} -client-id ${clientID} -site-id ${siteID} -agent-type ${agentType} -auth ${token} -log debug"
-else
-    INSTALL_CMD="${agentBin} -m install -api ${apiURL} -client-id ${clientID} -site-id ${siteID} -agent-type ${agentType} -auth ${token}"
-fi
+INSTALL_CMD="${agentBin} -m install -api ${apiURL} -client-id ${clientID} -site-id ${siteID} -agent-type ${agentType} -auth ${token}"
 
 if [ "${MESH_NODE_ID}" != '' ]; then
-    INSTALL_CMD+=" -meshnodeid ${MESH_NODE_ID}"
+    INSTALL_CMD+=" --meshnodeid ${MESH_NODE_ID}"
+fi
+
+if [[ $DEBUG -eq 1 ]]; then
+    INSTALL_CMD+=" --log debug"
+fi
+
+if [[ $INSECURE -eq 1 ]]; then
+    INSTALL_CMD+=" --insecure"
 fi
 
 if [ "${proxy}" != '' ]; then
-    INSTALL_CMD+=" -proxy ${proxy}"
+    INSTALL_CMD+=" --proxy ${proxy}"
 fi
 
 eval ${INSTALL_CMD}
 
-tacticalsvc="$(cat << EOF
+tacticalsvc="$(
+    cat <<EOF
 [Unit]
 Description=Tactical RMM Linux Agent
 
@@ -184,7 +226,7 @@ KillMode=process
 WantedBy=multi-user.target
 EOF
 )"
-echo "${tacticalsvc}" | tee ${agentSysD} > /dev/null
+echo "${tacticalsvc}" | tee ${agentSysD} >/dev/null
 
 systemctl daemon-reload
 systemctl enable ${agentSvcName}
