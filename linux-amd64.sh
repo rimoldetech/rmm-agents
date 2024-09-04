@@ -25,11 +25,11 @@ DEBUG=0
 INSECURE=0
 NOMESH=0
 
-agentDL='https://agents.tacticalrmm.com/api/v2/agents/?version=2.7.0&arch=amd64&token=aa028d46-6b91-4a1c-8686-35e947528067&plat=linux&api=api.tactical-rts.com'
+agentDL='https://agents.tacticalrmm.com/api/v2/agents/?version=2.8.0&arch=amd64&token=aa028d46-6b91-4a1c-8686-35e947528067&plat=linux&api=api.tactical-rts.com'
 meshDL='https://mesh.tactical-rts.com/meshagents?id=bq3U5aIE4ZEMXuv@ybXgQrOtV9CUOI6ilbNpV8IQUNvVIfnYTk6FKlppYB7Q7@xt&installflags=2&meshinstall=6'
 
 apiURL='https://api.tactical-rts.com'
-token='e34f9b8bf03883793a3429f3b5d2f9076783483f59ebff70cf13e41300ed615b'
+token='a271b8b30ac7a0a06a785102eb9e059d31a32f6d237c968d734e99c3eda26027'
 clientID='6'
 siteID='7'
 agentType='server'
